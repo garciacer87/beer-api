@@ -1,0 +1,8 @@
+FROM golang:alpine
+
+COPY target/beer-api /usr/local/bin/
+
+RUN addgroup -S api && adduser -S api -G api
+USER api
+
+CMD ["beer-api"]

@@ -1,0 +1,40 @@
+version: '3.9'
+
+services:
+  api:
+    build:
+      context: ./
+      dockerfile: build/docker/.
+    container_name: beer-api
+    ports:
+        - 8080:8080
+    restart: on-failure
+    depends_on:
+        - db
+    environment:
+        - PORT=8080
+        - DATABASE_URI=postgres://beerapi:beerapi@beer-db:5432/beerapi
+        - CURRENCY_API_TOKEN=f83259ef61cf6ddce301
+    networks:
+        - api-network
+  db:
+    image: postgres:13-alpine
+    container_name: beer-db
+    ports: 
+      - 5433:5432
+    volumes:
+      - beer-db-data:/var/lib/postgresql/data
+      - ./sql/postgresql/000001_init_schema.up.sql:/docker-entrypoint-initdb.d/000001_init_schema.up.sql
+    environment:
+      - POSTGRES_PASSWORD=beerapi
+      - POSTGRES_USER=beerapi
+      - POSTGRES_DB=beerapi
+    networks:
+      - api-network
+volumes:
+  beer-db-data:
+    external: false
+networks:
+  api-network:
+    driver: bridge
+    name: api-network
